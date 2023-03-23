@@ -1,5 +1,21 @@
 # We used three different software
 
 ########################Vibrant####################
-#VIBRANT_Lo2.sh
+#VIBRANT.sh contains:
 #! /bin/bash
+python VIBRANT/VIBRANT_run.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta
+
+########################VirSorter####################
+#VirSorter.sh contains:
+#! /bin/bash
+conda activate vs2
+virsorter run -w Lo2.out -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta --include-groups  "dsDNAphage,ssDNA,NCLDV" --min-score 0.5 --min-length 1000 -j 4 all
+
+########################DeepVirFinder####################
+#DeepVirFinder.sh contains
+#! /bin/bash
+conda activate dvf
+python dvf.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta -o Lo2/ -l 1000
+
+
+#######Using Python script adopted from 
