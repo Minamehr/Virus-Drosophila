@@ -26,10 +26,4 @@ python Virus_Finder_comparison.py /path/to/folder/contains/all/three/output
 
 cat ${LocID}_Filtered_final.fasta > Four_coassembly_viruses.fasta
 
-####################De-replication and creating virus metagenome-assembled genomes (vMAG)############################ 
 
-##############################vRhyme ######################
-#vRhyme.sh contains:
-#! /bin/bash
-conda activate vRhyme
-vRhyme -i Four_coassembly_viruses.fasta -t ... -o Virus_binned  -r Clean_Reads/*.fastq.gz --method longest
