@@ -18,4 +18,10 @@ conda activate dvf
 python dvf.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta -o Lo2/ -l 1000
 
 
-#######Using Python script adopted from 
+#######Python script adopted from github.com/mehregan59/File_comparison were used to compare results from three softwares and creat a final file based on requested criteria.
+
+python Virus_Finder_comparison.py /path/to/folder/contains/all/three/output
+
+######Then we cat all final file
+
+cat ${LocID}_Filtered_final.fasta > Four_coassembly_viruses.fasta
