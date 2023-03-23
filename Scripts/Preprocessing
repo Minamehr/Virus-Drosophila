@@ -1,0 +1,41 @@
+
+mkdir READ_QC Quality_Clean_Reads Mapout Clean_Reads Assemply
+
+############Rawdata to qualityClean data##################
+#We used Read-qc module from metaWRAP(github.com/bxlab/metaWRAP), in which Trim-galore were used for trimming the raw reads and Fastqc for assessing the the quality and generating the quality report.
+#before performing the metawrap read_qc, change the read-qc.sh in metawrap to accept also the compile file (example *.gz file) and keep all your raw files in a folder (example: Raw_reads folder).
+
+#Read_qc.sh script
+#! /bin/bash
+source /conda.sh
+conda activate metawrap-env
+metawrap read_qc -1 $fq1 -2 $fq2 -t 1 --skip-bmtagger -o $dn
+
+#Then submit the job with the following script
+for r1 in Raw_reads/DE*_1.fq.gz; do bn=$(basename $r1); qsub -q short -v "fq1=$r1, fq2=${r1%_1.fq.gz}_2.fq.gz, dn=READ_QC/${bn%_1.fq.gz}/" Read_qc.sh; done
+
+############qualityClean to final clean reads ##################
+#Before trimming the host reads (drosophila melanogaster: dm6.fna) transfer the Q trimmed sequences from READ_QC to Quality_Clean_Reads
+for i in READ_QC/*; do  b=${i#*/}; mv ${i}/final_pure_reads_1.fastq.gz Quality_Clean_Reads/${b}_1.fastq.gz; mv ${i}/final_pure_reads_2.fastq.gz Quality_Clean_Reads/${b}_2.fastq.gz; done
+
+#Mapping.sh script
+#! /bin/bash
+/BBMap_38.95/bbmap/bbmap.sh ref=/path/to/reference/dm6.fna nodisk -Xmx6g in1=$fq1 in2=$fq2 outu1=Mapout/$u1 outu2=Mapout/$u2 outm1=Mapout/$m1 outm2=Mapout/$m2
+
+#Then submit the job with the following script
+for r1 in *_1.fastq.gz; do qsub -q short -v "fq1=$r1, fq2=${r1%_1.fastq.gz}_2.fastq.gz, u1=${r1%_1.fastq.gz}_1_unmapped.fastq.gz, u2=${r1%_1.fastq.gz}_2_unmapped.fastq.gz, m1=${r1%_1.fastq.gz}_1_mapped.fastq.gz, m2=${r1%_1.fastq.gz}_2_mapped.fastq.gz" Mapping2.sh; done
+##Then transfered unmapped sequences to Clean_Reads
+
+############Clean reads to assembeled contigs##################
+#We used metawrap assembly model and co-assembled our samples per their sampling locations (we had four sampling site then we ended up with four co-assembeled files)
+
+#Co-assembly.sh script
+#! /bin/bash
+conda activate metawrap-env
+cat Clean_Reads/${LocID}/*_1.fastq.gz > Clean_Reads/${LocID}_READS_1.fastq.gz
+cat Clean_Reads/${LocID}/*_2.fastq.gz > Clean_Reads/${LocID}_READS_2.fastq.gz
+metawrap assembly -1 Clean_Reads/${LocID}_READS_1.fastq.gz -2 Clean_Reads/${LocID}_READS_2.fastq.gz -m 380 -t 15 -o ASSEMBLY_${LocID}
+
+
+
+
