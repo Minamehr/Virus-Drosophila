@@ -1,4 +1,68 @@
 For the taxonomy assignment, we used three different approaches.
 
 #####################vpf-class ###########################
+#We used vpf-class to taxonomically assign dereplicated virus sequences (unbinned) as well as vMAGs.
+#unbinned sequences (output from vRhyme).
+stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i Unbinned/vRhyme_derep_Virus.fa -o Virus_classified
+#vMAGs (output from vRhyme).
+for F in $(ls vRhyme_best_bins/*.fasta | sed 's/.fasta//'); do stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i ${F}.fasta -o ${F}_classified; done
+#Then for each bin we follow ()Popularity.
+
+#####################Diamond ####################
+I also check the taxonomy with the method described in  https://doi.org/10.1093/nar/gkac341 which cited https://doi.org/10.1038/s41467-021-23698-5 and its details in github https://github.com/AnantharamanLab/Kieft_and_Zhou_et_al._2020#taxonomy
+#as my diamond version was different I maid my database
+./diamond makedb --in PTT_database.faa --db PTT_database.dmnd
+#then because of diamond eror I changed the dimond call in the PTT.py file to ./diamond and then run
+python PTT.py -i Virus_dereplicated_proteins.faa
+
+#if I have the input file in protein from prodigal format and having all input and references in a single folder but if I dont:
+#-t to increase the number of threads used. -f to indicate "prot" (protein) or "nucl" (nucleotide) input. -d to provide the location for the Diamond database (if not in same folder as PTT.py). -v to provide the location for the metadata taxonomy file (if not in same folder as PTT.py). See PTT.py -h for the help menu.
+
+#For 167 bins
+for F in $(ls *.fasta | sed 's/.fasta//'); do prodigal -i ${F}.fasta -p meta -a ${F}.faa; done
+#then
+for F in $(ls /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_best_bins/*.faa | sed 's/.faa//'); do python PTT.py -i ${F}.faa; done
+
+#########################Protein ###########
+#############vConTACT2 https://bitbucket.org/MAVERICLab/vcontact2/src/master/
+conda activate vContact2
+#vcontact2 --raw-proteins test_data/VIRSorter_genomes.faa --proteins-fp test_data/VIRSorter_genomes_g2g.csv --db 'ProkaryoticViralRefSeq211-Merged' --output-dir vConTACT2_Results
+#vcontact2 --raw-proteins #Fasta_format_proteinfile.faa# --pcs-mode MCL"default" --vcs-mode ClusterONE"default" --seed-method nodes"default" --similarity match"default" –merge-method single –min-size 2 --rel-mode Diamond --db #Reference_database# --output-dir #output_file_name#
+#for my samples first
+#run prodigal
+prodigal -i vRhyme_derep_longest_Four_coassembly_viruses.fa -p meta -o Virus_dereplicated.genes -a Virus_dereplicated_proteins.faa -d Virus_dereplicated.ffn -s Virus_dereplicated
+#then vcontact2
+vcontact2 --raw-proteins /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_dereplication/Virus_dereplicated_proteins.faa  --proteins-fp /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_derep_virus.csv --pcs-mode MCL --vcs-mode ClusterONE --seed-method nodes --similarity match --merge-method single --min-size 2 --rel-mode Diamond --db 'ProkaryoticViralRefSeq211-Merged' --output-dir /data/reference/Metawrap/NovSeq/Virus/vRhyme/vContact2/vConTACT2_derep_Results
+#for long contigs
+python filter_fasta_by_list_of_headers.py vRhyme_derep_longest_Four_coassembly_viruses.fa short_contigs.txt > long-contigs.fasta
+conda activate metawrap-env
+prodigal -i long-contigs.fasta -p meta -o long-contigs.fasta.genes -a long-contigs_proteins.faa
+vcontact2 --raw-proteins /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_dereplication/long-contigs_proteins.faa  --proteins-fp /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_derep_virus.csv --pcs-mode MCL --vcs-mode ClusterONE --seed-method nodes --similarity match --merge-method single --min-size 2 --rel-mode Diamond --db 'ProkaryoticViralRefSeq211-Merged' --output-dir /data/reference/Metawrap/NovSeq/Virus/vRhyme/vContact2/vConTACT2_LongContigs_Results
+#or for high-quality one
+prodigal -i Virus_high_quality.fa -p meta -o Virus_high_quality.genes -a Virus_high_quality_proteins.faa
+vcontact2 --raw-proteins /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_dereplication/Virus_high_quality_proteins.faa  --proteins-fp /data/reference/Metawrap/NovSeq/Virus/vRhyme/vRhyme_derep_virus.csv --pcs-mode MCL --vcs-mode ClusterONE --seed-method nodes --similarity match --merge-method single --min-size 2 --rel-mode Diamond --db 'ProkaryoticViralRefSeq211-Merged' --output-dir /data/reference/Metawrap/NovSeq/Virus/vRhyme/vContact2/vConTACT2_Highquality_Results
+################ Cytoscape  http://manual.cytoscape.org/en/stable/Launching_Cytoscape.html
+https://www.protocols.io/view/applying-vcontact-to-viral-sequences-and-visualizi-kqdg3pnql25z/v5
+File 
+#######################
+
+#####################CrisprOpenDB  https://github.com/edzuf/CrisprOpenDB
+conda activate FCrisprOpenDB_env
+conda activate CrisprOpenDB_env
+makeblastdb -in SpacersDB.fasta -dbtype nucl -out SpacersDB
+python CL_Interface.py -i Novseq/Viruses.fasta 
+python CL_Interface.py -h
+-i", "--input
+-m MISMATCH, --mismatch
+-r, --report
+-b BLASTDB, --blastdb
+-f FASTADB, --fastadb
+-n NUM_THREADS
+
+
+
+
+
+
+
 
