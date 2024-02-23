@@ -15,4 +15,4 @@ The discovered viral contigs were checked for redundancy and virus metagenome-as
 
 Part4:Taxonomy and host assignment
 
-This part includes steps of protein clustering, taxonomy of viral contigs and host assignment of viral contigs 
+This part includes steps of protein clustering, taxonomy of viral contigs, and host assignment of viral contigs 
