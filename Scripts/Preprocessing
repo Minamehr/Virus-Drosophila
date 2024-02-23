@@ -1,18 +1,18 @@
 
 mkdir READ_QC Quality_Clean_Reads Mapout Clean_Reads Assemply
 
-############Rawdata to qualityClean data##################
-#We used Read-qc module from metaWRAP(github.com/bxlab/metaWRAP), in which Trim-galore were used for trimming the raw reads and Fastqc for assessing the the quality and generating the quality report.
-#before performing the metawrap read_qc, change the read-qc.sh in metawrap to accept also the compile file (example *.gz file) and keep all your raw files in a folder (example: Raw_reads folder).
+############Rawdata to Clean Reads##################
+#We used Trim-galore (Cutadapt and FastQC) for assessing the quality and generating the quality report, and for trimming the raw reads.
 
-#Read_qc.sh script
-#! /bin/bash
-source /conda.sh
-conda activate metawrap-env
-metawrap read_qc -1 $fq1 -2 $fq2 -t 1 --skip-bmtagger -o $dn
+mkdir ${out}/pre-QC_report
+	fastqc -q -t $threads -o ${out}/pre-QC_report -f fastq $reads_1 $reads_2
 
-#Then submit the job with the following script
-for r1 in Raw_reads/DE*_1.fq.gz; do bn=$(basename $r1); qsub -q short -v "fq1=$r1, fq2=${r1%_1.fq.gz}_2.fq.gz, dn=READ_QC/${bn%_1.fq.gz}/" Read_qc.sh; done
+trim_galore --no_report_file --paired -o $out $reads_1 $reads_2
+
+mkdir ${out}/post-QC_report
+	fastqc -t $threads -o ${out}/post-QC_report -f fastq ${out}/final_pure_reads_1.fastq and ${out}/final_pure_reads_2.fastq
+
+
 
 ############qualityClean to final clean reads ##################
 #Before trimming the host reads (drosophila melanogaster: dm6.fna) transfer the Q trimmed sequences from READ_QC to Quality_Clean_Reads
