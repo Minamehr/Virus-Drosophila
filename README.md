@@ -1,13 +1,13 @@
 
-This directory includes scripts related to the manuscript "A diverse gut virome from Drosophila melanogaster reveals functional association with the microbiota".
+This directory includes scripts related to the manuscript "A diverse gut virome from _Drosophila melanogaster_".
 
 Part1: Preprocessing
 
-Includes metagenomic data preprocessing and assembly: Trimming reads and removing host reads (Drosophila melanogaster), generating high-quality sequences. Then assemble short reads into long contigs. 
+Includes metagenomic data preprocessing and assembly: Trimming reads and removing host reads (_Drosophila melanogaster_), generating high-quality sequences. Then assemble short reads into long contigs. 
 
 Part2: Virus discovery
 
-This part includes steps of predicting viral contigs.
+This part includes steps for predicting viral contigs.
 
 Part3: vMAG
 
