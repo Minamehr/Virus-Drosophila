@@ -1,30 +1,27 @@
 
-mkdir READ_QC Quality_Clean_Reads Mapout Clean_Reads Assemply
+mkdir Quality_Clean_Reads Mapout Clean_Reads Assemply
 
 ############Rawdata to Clean Reads##################
-#We used Trim-galore (Cutadapt and FastQC) for assessing the quality and generating the quality report, and for trimming the raw reads.
+#We used Trim-galore with the default parameters for assessing the quality and for trimming the raw reads.
+#filter host sequence 
 
-mkdir ${out}/pre-QC_report
-	fastqc -q -t $threads -o ${out}/pre-QC_report -f fastq $reads_1 $reads_2
+Quality_Clean_Reads=./Quality_Clean_Reads
+Mapout=./Mapout
+Clean_Reads=./Clean_Reads
 
-trim_galore --no_report_file --paired -o $out $reads_1 $reads_2
+#We used the BBMap to map our sequences to reference genome (drosophila melanogaster: dm6.fna)and transfered the unmapped reads to the Mapout folder.
 
-mkdir ${out}/post-QC_report
-	fastqc -t $threads -o ${out}/post-QC_report -f fastq ${out}/final_pure_reads_1.fastq and ${out}/final_pure_reads_2.fastq
+cd ${Quality_Clean_Reads}
+	
+fq1=$r1 
+fq2=${r1%_1.fastq.gz}_2.fastq.gz
+u1=${r1%_1.fastq.gz}_1_unmapped.fastq.gz
+u2=${r1%_1.fastq.gz}_2_unmapped.fastq.gz 
+m1=${r1%_1.fastq.gz}_1_mapped.fastq.gz
+m2=${r1%_1.fastq.gz}_2_mapped.fastq.gz
 
-
-
-############qualityClean to final clean reads ##################
-#Before trimming the host reads (drosophila melanogaster: dm6.fna) transfer the Q trimmed sequences from READ_QC to Quality_Clean_Reads
-for i in READ_QC/*; do  b=${i#*/}; mv ${i}/final_pure_reads_1.fastq.gz Quality_Clean_Reads/${b}_1.fastq.gz; mv ${i}/final_pure_reads_2.fastq.gz Quality_Clean_Reads/${b}_2.fastq.gz; done
-
-#Mapping.sh script 
-#! /bin/bash
-/BBMap_38.95/bbmap/bbmap.sh ref=/path/to/reference/dm6.fna nodisk -Xmx6g in1=$fq1 in2=$fq2 outu1=Mapout/$u1 outu2=Mapout/$u2 outm1=Mapout/$m1 outm2=Mapout/$m2
-
-#Then submit the job with the following script
-for r1 in *_1.fastq.gz; do qsub -q short -v "fq1=$r1, fq2=${r1%_1.fastq.gz}_2.fastq.gz, u1=${r1%_1.fastq.gz}_1_unmapped.fastq.gz, u2=${r1%_1.fastq.gz}_2_unmapped.fastq.gz, m1=${r1%_1.fastq.gz}_1_mapped.fastq.gz, m2=${r1%_1.fastq.gz}_2_mapped.fastq.gz" Mapping2.sh; done
-##Then transfered unmapped sequences to Clean_Reads
+BBMap_38.95/bbmap/bbmap.sh ref=/path/to/reference/dm6.fna nodisk -Xmx6g in1=$fq1 in2=$fq2 outu1=${Mapout}/$u1 outu2=${Mapout}/$u2 outm1=${Mapout}/$m1 outm2=${Mapout}/$m2
+##Then transfered unmapped sequences to ${Clean_Reads} folder
 
 ############to calculate the percentage of host contamination 
 #we used a python script that would extract the data from all mapping file (from each individual) and creat a table containing the number and percentage of reads to the reference  
@@ -32,15 +29,25 @@ for r1 in *_1.fastq.gz; do qsub -q short -v "fq1=$r1, fq2=${r1%_1.fastq.gz}_2.fa
 python datacleaning.py Path/to/Mapout
 
 ############Clean reads to assembeled contigs##################
-#We used metawrap assembly model and co-assembled our samples per their sampling locations (we had four sampling site then we ended up with four co-assembeled files)
+megahit=~/bin/megahit
+CleanData=./Clean_Reads
+Assembly=./Assembly
 
-#Co-assembly.sh script
-#! /bin/bash
-conda activate metawrap-env
-cat Clean_Reads/${LocID}/*_1.fastq.gz > Clean_Reads/${LocID}_READS_1.fastq.gz
-cat Clean_Reads/${LocID}/*_2.fastq.gz > Clean_Reads/${LocID}_READS_2.fastq.gz
-metawrap assembly -1 Clean_Reads/${LocID}_READS_1.fastq.gz -2 Clean_Reads/${LocID}_READS_2.fastq.gz -m 380 -t 15 -o ASSEMBLY_${LocID}
+#We used Megahit and co-assembled our samples per their sampling locations (we had four sampling site then we ended up with four co-assembeled files)
 
+#merge all reads from same sampling location
+cat ${Clean_Reads}/${LocID}/*_1.fastq.gz > ${Clean_Reads}/${LocID}_READS_1.fastq.gz
+cat ${Clean_Reads}/${LocID}/*_2.fastq.gz > ${Clean_Reads}/${LocID}_READS_2.fastq.gz
 
+#Co-assembly per location
+${megahit} -1 ${Clean_Reads}/${LocID}_READS_1.fastq.gz \
+-2 ${Clean_Reads}/${LocID}_READS_2.fastq.gz \
+--min-count 2 \
+--k-min 21 \
+--k-max 141 \
+--k-step 10 \
+--num-cpu-threads 20 \
+--min-contig-len 1000 \
+-o ${Assemply}/ASSEMBLY_${LocID}
 
 
