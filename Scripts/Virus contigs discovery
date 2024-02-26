@@ -1,9 +1,11 @@
 # We used three different software
-
+mkdir Vibrant VirSorter DeepVirFinder Virus
 ########################Vibrant####################
-#VIBRANT.sh contains:
-#! /bin/bash
-python VIBRANT/VIBRANT_run.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta
+
+Assembly=./Assembly
+VIBRANT=./VIBRANT
+
+python ${VIBRANT}/VIBRANT_run.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta
 
 ########################VirSorter####################
 #VirSorter.sh contains:
