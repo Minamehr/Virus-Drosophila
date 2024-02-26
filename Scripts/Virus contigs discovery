@@ -1,31 +1,32 @@
 # We used three different software
 mkdir Vibrant VirSorter DeepVirFinder Virus
 ########################Vibrant####################
-
-Assembly=./Assembly
+ASSEMBLY_LocID= ${ASSEMBLY_LocID}
 VIBRANT=./VIBRANT
 
-python ${VIBRANT}/VIBRANT_run.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta
+python ${VIBRANT}/VIBRANT_run.py -i ${ASSEMBLY_LocID}/${LocID}_final_assembly.fasta
 
 ########################VirSorter####################
-#VirSorter.sh contains:
-#! /bin/bash
+VirSorter=./VirSorter
+source /path/to/conda.sh
 conda activate vs2
-virsorter run -w Lo2.out -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta --include-groups  "dsDNAphage,ssDNA,NCLDV" --min-score 0.5 --min-length 1000 -j 4 all
+
+virsorter run -w ${VirSorter}/${LocID}.out -i ${ASSEMBLY_LocID}/${LocID}_final_assembly.fasta --include-groups  "dsDNAphage,ssDNA,NCLDV" --min-score 0.5 --min-length 1000 -j 4 all
 
 ########################DeepVirFinder####################
-#DeepVirFinder.sh contains
-#! /bin/bash
+DeepVirFinder=./DeepVirFinder
+
+source /path/to/conda.sh
 conda activate dvf
-python dvf.py -i ASSEMBLY_${LocID}/${LocID}_final_assembly.fasta -o Lo2/ -l 1000
+python dvf.py -i ${ASSEMBLY_LocID}/${LocID}_final_assembly.fasta -o ${DeepVirFinder}/${LocID}_DVF -l 1000
 
 
 #######Python script adopted from github.com/mehregan59/File_comparison were used to compare results from three softwares and creat a final file based on requested criteria.
+#moved outputs from three diferent softwares (${VIBRANT}/VIBRANT_summary_results.tsv ${VirSorter}/${LocID}/final-viral-score.tsv ${DeepVirFinder}/${LocID}_dvfpred.txt) to a single folder per sampling location ${LocID}_Virus and then the results from three softwares were comapred
 
-python Virus_Finder_comparison.py /path/to/folder/contains/all/three/output
+python Virus_Finder_comparison.py /path/to/folder/contains/all/three/output/${LocID}_Virus 
 
-######Then we cat all final file
+######Finaly we merge all final results
+Virus=./Virus
 
-cat ${LocID}_Filtered_final.fasta > Four_coassembly_viruses.fasta
-
-
+cat ${LocID}-Virus/*_Filtered_final.fasta > ${Virus}/Four_coassembly_viruses.fasta
