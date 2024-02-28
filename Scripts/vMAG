@@ -3,6 +3,7 @@
 ##############################vRhyme ######################
 #vRhyme.sh contains:
 #! /bin/bash
+source /path/to/conda.sh
 conda activate vRhyme
 vRhyme -i Four_coassembly_viruses.fasta -t 10 -o Virus_binned  -r Clean_Reads/*.fastq.gz --method longest
 
@@ -14,6 +15,7 @@ Then the final vMAG recovered with <5 redundant proteins.
 ##############################Checkv ######################
 #Checkv.sh contins:
 #! /bin/bash
+source /path/to/conda.sh
 conda activate checkv
 checkv end_to_end path/to/dereplicated/virus-file Checkv_dreplicated_virus  -t 8 -d path/to/checkv-db-v1.4
 
@@ -21,5 +23,6 @@ checkv end_to_end path/to/dereplicated/virus-file Checkv_dreplicated_virus  -t 8
 # we also used Cenote-Taker2 to annotate and chack the final set of our virus contigs
 #Cenote-Taker2.sh contins:
 #! /bin/bash
+source /path/to/conda.sh
 conda activate cenote-taker2_env
-python run_cenote-taker2.py -c path/to/dereplicated/virus-file -r viruses_nov -t 8 -p False -am True --wrap False 
+python run_cenote-taker2.py -c path/to/dereplicated/virus-file -r output_folder_name -t 8 -p False -am True --wrap False 
