@@ -5,7 +5,7 @@
 #! /bin/bash
 source /path/to/conda.sh
 conda activate vRhyme
-vRhyme -i Four_coassembly_viruses.fasta -t 10 -o Virus_binned  -r Clean_Reads/*.fastq.gz --method longest
+vRhyme -i Four_coassembly_viruses.fasta -t 10 -o Virus_binned  -r Path/to/paired-end_Reads/*.fastq.gz --method longest
 
 #The best Identified bins files have been further investigated following the vRhyme criteria (Kieft et al., 2022).
 Then the final vMAG recovered with <5 redundant proteins.
