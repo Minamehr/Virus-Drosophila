@@ -3,13 +3,14 @@ For the taxonomy assignment, we used three different approaches.
 #####################vpf-class ###########################
 #We used vpf-class to taxonomically assign dereplicated virus sequences (unbinned) as well as vMAGs.
 #unbinned sequences (output from vRhyme).
-stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i Unbinned/vRhyme_derep_Virus.fa -o Virus_classified
-#vMAGs (output from vRhyme).
-for F in $(ls vRhyme_best_bins/*.fasta | sed 's/.fasta//'); do stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i ${F}.fasta -o ${F}_classified; done
+stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i input_file -o Output_folder_name
+
+#For vMAGs (output from vRhyme) we followed similar procedures 
+for F in $(ls Path/to/bins/foleder/*.fasta | sed 's/.fasta//'); do stack exec -- vpf-class --data-index vpf-class-data/index.yaml -i ${F}.fasta -o ${F}_classified; done
 #Then for each bin we follow ()Popularity.
 
 #####################Diamond ####################
-I also check the taxonomy with the method described in  https://doi.org/10.1093/nar/gkac341 which cited https://doi.org/10.1038/s41467-021-23698-5 and its details in github https://github.com/AnantharamanLab/Kieft_and_Zhou_et_al._2020#taxonomy
+We also check the taxonomy with the method described in  https://doi.org/10.1093/nar/gkac341 which cited https://doi.org/10.1038/s41467-021-23698-5 and its details in github https://github.com/AnantharamanLab/Kieft_and_Zhou_et_al._2020#taxonomy
 #as my diamond version was different I maid my database
 ./diamond makedb --in PTT_database.faa --db PTT_database.dmnd
 #then because of diamond eror I changed the dimond call in the PTT.py file to ./diamond and then run
