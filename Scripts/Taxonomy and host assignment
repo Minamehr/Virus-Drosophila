@@ -10,8 +10,9 @@ for F in $(ls Path/to/bins/foleder/*.fasta | sed 's/.fasta//'); do stack exec --
 #Then for each bin we follow ()Popularity.
 
 #####################Diamond ####################
-We also check the taxonomy with the method described in  https://doi.org/10.1093/nar/gkac341 which cited https://doi.org/10.1038/s41467-021-23698-5 and its details in github https://github.com/AnantharamanLab/Kieft_and_Zhou_et_al._2020#taxonomy
-#as my diamond version was different I maid my database
+We also check the taxonomy with the method described in   Kieft_and_Zhou_et_al._2020 (https://github.com/AnantharamanLab/Kieft_and_Zhou_et_al._2020)
+
+#To make database for the diamond
 ./diamond makedb --in PTT_database.faa --db PTT_database.dmnd
 #then because of diamond eror I changed the dimond call in the PTT.py file to ./diamond and then run
 python PTT.py -i Virus_dereplicated_proteins.faa
