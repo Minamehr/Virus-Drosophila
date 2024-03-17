@@ -1,5 +1,5 @@
 
-This directory includes scripts related to the manuscript "A diverse gut virome from _Drosophila melanogaster_".
+# This directory includes scripts related to the manuscript "A diverse gut virome from _Drosophila melanogaster_".
 
 Part1: Preprocessing
 
@@ -16,3 +16,6 @@ The discovered viral contigs were checked for redundancy and virus metagenome-as
 Part4:Taxonomy and host assignment
 
 This part includes steps of protein clustering, taxonomy of viral contigs, and host assignment of viral contigs 
+
+# Software
+
