@@ -1,14 +1,19 @@
 mkdir Quality_Clean_Reads Mapout Clean_Reads Assemply
 
 ############ Rawdata to Clean Reads ##################
-#We used Trim-galore with the default parameters for assessing the quality and for trimming the raw reads.
-#filter host sequence 
+# Quality Control and Trimming:
+#Trim raw reads using Trim-galore with default parameters.
+#Store quality-controlled reads in the Quality_Clean_Reads directory.
+
+
+# filter out host sequences. 
 
 Quality_Clean_Reads=./Quality_Clean_Reads
 Mapout=./Mapout
 Clean_Reads=./Clean_Reads
 
-#We used the BBMap to map our sequences to reference genome (drosophila melanogaster: dm6.fna)and transfered the unmapped reads to the Mapout folder.
+#Map cleaned reads to the reference genome (Drosophila melanogaster: dm6.fna) using BBMap.
+#Separate mapped and unmapped reads and store them in the Mapout directory.
 
 cd ${Quality_Clean_Reads}
 	
@@ -22,23 +27,26 @@ m2=${r1%_1.fastq.gz}_2_mapped.fastq.gz
 BBMap_38.95/bbmap/bbmap.sh ref=/path/to/reference/dm6.fna nodisk -Xmx6g in1=$fq1 in2=$fq2 outu1=${Mapout}/$u1 outu2=${Mapout}/$u2 outm1=${Mapout}/$m1 outm2=${Mapout}/$m2
 ##Then transfered unmapped sequences to ${Clean_Reads} folder
 
-############ to calculate the percentage of host contamination 
-#we used a python script that would extract the data from all mapping file (from each individual) and creat a table containing the number and percentage of reads to the reference  
-#We adopted this python script from github.com/mehregan59/percentage-mapped-to-reference
+############ Calculating Host Contamination: 
+#Use a Python script (datacleaning.py) to extract data from mapping files and calculate the percentage of reads mapped to the reference genome.
+#Store the results in a table.
+#python script from github.com/mehregan59/percentage-mapped-to-reference
 python datacleaning.py Path/to/Mapout
 
-############ Clean reads to assembeled contigs ##################
+############ Assembly: Clean reads to contigs ##################
+# Co-assemble cleaned reads using Megahit.
+
 megahit=~/bin/megahit
 CleanData=./Clean_Reads
 Assembly=./Assembly
 
-#We used Megahit and co-assembled our samples per their sampling locations (we had four sampling site then we ended up with four co-assembeled files)
-
-#merge all reads from same sampling location
+#Merge reads from the same sampling location.
 cat ${Clean_Reads}/${LocID}/*_1.fastq.gz > ${Clean_Reads}/${LocID}_READS_1.fastq.gz
 cat ${Clean_Reads}/${LocID}/*_2.fastq.gz > ${Clean_Reads}/${LocID}_READS_2.fastq.gz
 
-#Co-assembly per location
+#Perform co-assembly per location.
+#Store assembled contigs in the Assembly directory.
+
 ${megahit} -1 ${Clean_Reads}/${LocID}_READS_1.fastq.gz \
 -2 ${Clean_Reads}/${LocID}_READS_2.fastq.gz \
 --min-count 2 \
@@ -48,5 +56,4 @@ ${megahit} -1 ${Clean_Reads}/${LocID}_READS_1.fastq.gz \
 --num-cpu-threads 20 \
 --min-contig-len 1000 \
 -o ${Assembly}/ASSEMBLY_${LocID}
-
 
